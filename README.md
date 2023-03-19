@@ -29,3 +29,6 @@ For the webapp application with apache and mysql data, I deployed a ChatBox appl
 
 ###### Challenge: The LoadBalancer created for the monitoring and logging do not respond
 
+##### 3. Jenkins Pipeline
+I setup Jenkinsfile to pipeline the two applications to kuberneters cluster
+
