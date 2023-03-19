@@ -1,7 +1,7 @@
 ### ALTSCHOOL AFRICA THIRD SEMESTER EXAMINATION FOR CLOUD ENGINEER
 This project is done with the use of Kubernetes, Terraform, Ansible and AWS Cloud provider.
 
-#####1. Kubeadm Kubernetes Cluster:
+##### 1. Kubeadm Kubernetes Cluster:
 I deployed all the infrastures required to provision/setup Kubeadm Nodes using terraform and ansible. 
 
 The Secret files, terraform.tfvars files are encrypted using ANSIBLE VAULT. To view, edit or decrypt the encrypted files, use "Faith2020@" p@ssword.
