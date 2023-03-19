@@ -1,0 +1,107 @@
+  - name: Remove docker if installed from CentOS repo
+    yum:
+      name:
+        - docker
+        - docker-client
+        - docker-client-latest
+        - docker-common
+        - docker-latest
+        - docker-latest-logrotate
+        - docker-logrotate
+        - docker-engine
+      state: absent
+
+  - name: Install required pkgs
+    yum:
+      name:
+        - yum-utils
+        - device-mapper-persistent-data
+        - lvm2
+      state: latest
+  
+  - name: Add_repository
+    yum_repository:
+        name: docker
+        description: Dockerrepo
+        baseurl: "https://download.docker.com/linux/centos/7/x86_64/stable/"
+        gpgcheck: no
+
+  - name: Install Docker
+    yum:
+      name:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+      state: latest
+
+  - name: Start the Docker service
+    service:
+        name: "docker"
+        state: started
+
+  - name: Ensure SELinux is set to enforcing mode
+    lineinfile:
+        path: /etc/selinux/config
+        regexp: '^SELINUX='
+        line: SELINUX=permissive
+  - name: Configure kubernetes repo
+    shell: |
+        cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+        [kubernetes]
+        name=Kubernetes
+        baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+        enabled=1
+        gpgcheck=1
+        repo_gpgcheck=1
+        gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+        exclude=kubelet kubeadm kubectl
+        EOF
+
+
+    args:
+            executable: /bin/bash
+  - name: Install kubelet, kubeadm and kubectl
+    command: sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+
+
+  - name: For change the driver of docker(cgroup ---> systemd)
+    copy:
+        src: 'daemon.json'
+        dest: '/etc/docker/'
+  - name: Relaod the Docker service(daemon)
+    service:
+        name: "docker"
+        state: started
+
+
+  - name: For Off all types of swap
+    command: swapoff -a
+  - name: For comment the swap in /etc/fstab file.
+    replace:
+        path: /etc/fstab
+        regexp: '/dev/mapper/rhel-swap   swap                    swap    defaults        0 0'
+        replace: '#/dev/mapper/rhel-swap   swap                    swap    defaults        0 0'
+  - name: long shell script
+    shell: |
+        cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+        net.bridge.bridge-nf-call-ip6tables = 1
+        net.bridge.bridge-nf-call-iptables = 1
+        EOF
+    args:
+        executable: /bin/bash
+  - name: Install iproute-tc
+    command: sudo yum install iproute-tc
+  - name: "Enabling IPtables Bridge Firewall Rule"
+    command: "echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables"
+  - name: Start kubelet
+    service:
+        name: "kubelet"
+        state: started
+        enabled: yes
+  - name: copy the content at all the nodes in /etc/hosts file
+    blockinfile:
+        path: /etc/hosts
+        block: |
+              184.169.221.145    Master
+              18.144.80.38     SlaveNode1
+              18.144.163.196    SlaveNode2

@@ -1,0 +1,33 @@
+---
+
+- hosts: all
+  become: true
+  become_user: root
+  gather_facts: false
+  tasks:
+    - include_role:
+        name: add_devops_user
+        tasks_from: add_user.yml
+        
+- hosts: jenkins
+  become: true
+  become_user: root
+  gather_facts: false
+  tasks:
+    - include_role:
+        name: jenkins
+
+- name: use the k8s cluster master role
+  hosts: master
+  become: true
+  roles:
+    - mtabishk.ansible_kubernetes_master_role 
+
+- name: use the k8s cluster worker role
+  hosts: workers
+  become: true
+  roles:
+    - mtabishk.ansible_kubernetes_worker_role 
+
+      
+...

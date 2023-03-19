@@ -1,0 +1,78 @@
+pipeline{
+    environment {
+       masterserverip = "3.85.147.34" 
+       baseImage = "fajmayor/chatbot-1"
+       dockerimagename = "${baseImage}:${env.BUILD_NUMBER}"
+       dockerImage = ''
+    }
+
+    agent any
+
+    stages {
+        stage('Checkout Latest Source For ChatBot') {
+            steps {
+                git branch: 'master', url: 'https://github.com/fajmayor/RUET-ChatBot.git'
+            }
+        }
+
+        stage('Build image') {
+            steps {
+                script {
+                    sh 'docker rm -f ${baseImage}'
+                    dockerImage = docker.build dockerimagename
+                }
+            }
+        }
+
+        stage('Push image') {
+            environment{
+                registryCredential = 'dockerhublogin'
+            }
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', registryCredential) {
+                        dockerImage.push("${BUILD_NUMBER}")
+                        sh 'docker rmi -f ${dockerimagename}'  
+                    }
+                }
+            }
+        }
+        
+        stage('Deploying ChatBox to Kubernetes') {
+            steps {
+                sshagent(['kubesshloginkey']){
+                    sh "scp -o strictHOstKeyChecking=no php-deployment.yaml ec2-user@${masterserverip}:/home/ec2-user"
+                    sh "scp -o strictHOstKeyChecking=no mysql-pv.yaml ec2-user@${masterserverip}:/home/ec2-user"
+                    sh "scp -o strictHOstKeyChecking=no mysql-deployment.yaml ec2-user@${masterserverip}:/home/ec2-user"
+                    script {       
+                            sh "ssh ec2-user@${masterserverip} sudo kubectl apply -f php-deployment.yaml"
+                            sh "ssh ec2-user@${masterserverip} sudo kubectl apply -f mysql-pv.yaml"
+                            sh "ssh ec2-user@${masterserverip} sudo kubectl apply -f mysql-deployment.yaml"
+                    }
+                }
+            }
+        }
+
+        stage('Checkout Latest Source for microservice') {
+            steps {
+                git branch: 'master', url: 'https://github.com/fajmayor/microservices-demo.git'
+            }
+        }
+
+        stage('Deploying Microservice Kubernetes') {
+            steps {
+                dir('deploy/kubernetes'){
+                    sshagent(['kubesshloginkey']){
+                        //sh 'cd ${WORKSPACE}/deploy/kubernetes'
+                        sh "scp -o strictHOstKeyChecking=no complete-demo.yaml ec2-user@${masterserverip}:/home/ec2-user"
+
+                        script {       
+                            sh "ssh ec2-user@${masterserverip} sudo kubectl apply -f complete-demo.yaml"
+                        }
+                    }
+                }
+                
+            }
+        }
+    }
+}

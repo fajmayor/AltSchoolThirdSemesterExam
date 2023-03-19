@@ -1,0 +1,82 @@
+pipeline{
+    environment {
+       userName = "ubuntu"
+       masterserverip = "44.203.30.180" 
+       baseImage = "fajmayor/chatbot-1"
+       dockerimagename = "${baseImage}:${BUILD_NUMBER}"
+       dockerImage = ''
+    }
+
+    agent any
+
+    stages {
+        stage('Checkout Latest Source For ChatBot') {
+            steps {
+                git branch: 'master', url: 'https://github.com/fajmayor/AltshoolChatBox.git'
+            }
+        }
+
+        stage('Build image') {
+            steps {
+                script {
+                    sh 'docker rm -f ${baseImage}:${BUID_NUMBER}'
+                    dockerImage = docker.build dockerimagename
+                }
+            }
+        }
+
+        stage('Push image') {
+            environment{
+                registryCredential = 'dockerhublogin'
+            }
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', registryCredential) {
+                        dockerImage.push("${BUILD_NUMBER}")
+                        sh 'docker rmi -f ${dockerimagename}'  
+                    }
+                }
+            }
+        }
+        
+        stage('Deploying ChatBox to Kubernetes') {
+            steps {
+                sshagent(['kubesshlogin2']){
+                    sh "scp -o strictHOstKeyChecking=no php-deployment.yaml ${userName}@${masterserverip}:/home/ubuntu"
+                    sh "scp -o strictHOstKeyChecking=no mysql-pv.yaml ${userName}@${masterserverip}:/home/ubuntu"
+                    sh "scp -o strictHOstKeyChecking=no mysql-deployment.yaml ${userName}@${masterserverip}:/home/ubuntu"
+                    script {       
+                            sh "ssh ${userName}@${masterserverip} kubectl apply -f php-deployment.yaml"
+                            sh "ssh ${userName}@${masterserverip} kubectl apply -f mysql-pv.yaml"
+                            sh "ssh ${userName}@${masterserverip} kubectl apply -f mysql-deployment.yaml"
+                    }
+                }
+            }
+        }
+
+        stage('Checkout Latest Source for microservice') {
+            steps {
+                git branch: 'master', url: 'https://github.com/fajmayor/microservices-demo.git'
+            }
+        }
+
+        stage('Deploying Microservice Kubernetes') {
+            steps {
+                dir('deploy/kubernetes'){
+                    sshagent(['kubesshlogin2']){
+                        //sh 'cd ${WORKSPACE}/deploy/kubernetes'
+                        sh "scp -o strictHOstKeyChecking=no complete-demo.yaml ${userName}@${masterserverip}:/home/ubuntu"
+                        sh "scp -o strictHOstKeyChecking=no -r manifests-monitoring ${userName}@${masterserverip}:/home/ubuntu"
+
+                        script {       
+                            sh "ssh ${userName}@${masterserverip} kubectl apply -f complete-demo.yaml"
+                            sh "ssh ${userName}@${masterserverip} kubectl create -f manifests-monitoring/00-monitoring-ns.yaml"
+                            
+                        }
+                    }
+                }
+                
+            }
+        }
+    }
+}

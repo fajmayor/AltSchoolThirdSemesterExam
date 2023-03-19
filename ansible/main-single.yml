@@ -1,0 +1,19 @@
+---
+
+- hosts: worker-new
+  become: true
+  become_user: root
+  gather_facts: false
+  tasks:
+    - include_role:
+        name: add_devops_user
+        tasks_from: add_user.yml
+
+- name: use the k8s cluster worker role
+  hosts: worker-new
+  become: true
+  roles:
+    - mtabishk.ansible_kubernetes_worker_role 
+
+      
+...
