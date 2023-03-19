@@ -65,7 +65,7 @@ resource "aws_instance" "master_kubeadm_ec2_instance" {
   associate_public_ip_address = true
 
   tags = {
-    Name = "MasterNode-Instance"
+    Name = "KubeadmMasterNode"
   }
 }
 
