@@ -18,14 +18,14 @@ The Grafana server: "3.85.147.34:31300" --- "sock-shop app specific"
 The prometheus server: 3.85.147.34:30961/targets --- "Service/Resources monitoring"
 
 
-######Challenge: I had issue setting up nginx ingress controller on the kubeadm cluster which made me to do more research on alternative Kubernetes cluster bootstrapping tools.
+###### Challenge: I had issue setting up nginx ingress controller on the kubeadm cluster which made me to do more research on alternative Kubernetes cluster bootstrapping tools.
 
-#####2. Kops Kubernetes Cluster:
+##### 2. Kops Kubernetes Cluster:
 Using Terraform, I deployed kops kubernetes clusters, 1 Master Node and 1 Worker to aws.
 
 For the sock-shop microservice: sock.exam.fajmayor.me
 
 For the webapp application with apache and mysql data, I deployed a ChatBox application for AltSchool: chatbox.exam.fajmayor.me
 
-######Challenge: The LoadBalancer created for the monitoring and logging do not respond
+###### Challenge: The LoadBalancer created for the monitoring and logging do not respond
 
