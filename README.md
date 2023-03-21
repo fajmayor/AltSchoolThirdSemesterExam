@@ -23,14 +23,18 @@ The prometheus server: 3.85.147.34:30961/targets --- "Service/Resources monitori
 ##### 2. Kops Kubernetes Cluster:
 Using Terraform, I deployed kops kubernetes clusters, 1 Master Node and 1 Worker to aws.
 
-For the sock-shop microservice: sock.exam.fajmayor.me
+For the sock-shop microservice: sock-shop.exam.fajmayor.me
 
 For the webapp application with apache and mysql data, I deployed a ChatBox application for AltSchool: chatbox.exam.fajmayor.me
 
-###### Challenge: The LoadBalancer created for the monitoring and logging do not respond
+Prometheus: prometheus.exam.fajmayor.me
+
+Grafana: grafana.exam.fajmayor.me
 
 ##### 3. Jenkins Pipeline
 I setup Jenkinsfile to pipeline the two applications to kuberneters cluster
+
+Jenkins server: http://100.24.62.218:8080
 
 ##### 4. Provisioning the Infrastructures for the Kubeadm
 From the "microservice" directory, run "terraform apply" and watch the infrastructures setup of VPC, SG, ALB, and NAT gate to startup in aws.
