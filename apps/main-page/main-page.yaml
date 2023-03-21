@@ -10,7 +10,7 @@ spec:
   - protocol: "TCP"
     port: 80
     targetPort: 80
-  type: NodePort
+  type: LoadBalancer
 
 ---
 apiVersion: apps/v1
@@ -34,7 +34,7 @@ spec:
     spec:
       containers:
       - name: home-page
-        image: html-server-image:v1
+        image: fajmayor/html-server-image:v1
         imagePullPolicy: Always
         ports:
-        - containerPort: 8081
+        - containerPort: 80

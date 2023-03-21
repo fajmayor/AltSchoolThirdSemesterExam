@@ -1,0 +1,35 @@
+pipeline{
+    environment {
+       userName = "ubuntu"
+       masterserverip = "44.203.30.180" 
+       baseImage = "fajmayor/chatbot-1"
+       dockerimagename = "${baseImage}:${BUILD_NUMBER}"
+       dockerImage = ''
+    }
+
+    agent any
+
+    stages {
+        stage('Checkout Latest Source For Front Page') {
+            steps {
+                git branch: 'master', url: 'https://github.com/fajmayor/AltSchoolThirdSemesterExam.git'
+            }
+        }
+        
+        stage('Deploying Front Page to Kubernetes') {
+            steps {
+                dir('apps/main-page'){
+                    sshagent(['kubesshlogin2']){
+                        //sh 'cd ${WORKSPACE}/deploy/kubernetes'
+                        sh "scp -o strictHOstKeyChecking=no main-page.yaml ${userName}@${masterserverip}:/home/ubuntu"
+
+                        script {       
+                            sh "ssh ${userName}@${masterserverip} kubectl apply -f main-page.yaml"
+                            
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
