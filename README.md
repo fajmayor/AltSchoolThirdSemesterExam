@@ -23,13 +23,13 @@ The prometheus server: 3.85.147.34:30961/targets --- "Service/Resources monitori
 ##### 2. Kops Kubernetes Cluster:
 Using Terraform, I deployed kops kubernetes clusters, 1 Master Node and 1 Worker to aws.
 
-For the sock-shop microservice: sock-shop.exam.fajmayor.me
+For the sock-shop microservice: http://sock-shop.exam.fajmayor.me
 
-For the webapp application with apache and mysql data, I deployed a ChatBox application for AltSchool: chatbox.exam.fajmayor.me
+For the webapp application with apache and mysql data, I deployed a ChatBox application for AltSchool: http://chatbox.exam.fajmayor.me
 
 Prometheus: prometheus.exam.fajmayor.me
 
-Grafana: grafana.exam.fajmayor.me
+Grafana: http://grafana.exam.fajmayor.me
 
 ##### 3. Jenkins Pipeline
 I setup Jenkinsfile to pipeline the two applications to kuberneters cluster
