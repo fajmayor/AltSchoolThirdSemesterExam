@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: html-page
+spec:
+  selector:
+    app: html-page
+    tier: frontend
+  ports:
+  - protocol: "TCP"
+    port: 80
+    targetPort: 80
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-page
+  labels:
+    app: html-page
+    tier: frontend
+spec:
+  selector:
+    matchLabels:
+      app: html-page
+      tier: frontend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: html-page
+        tier: frontend
+    spec:
+      containers:
+      - name: home-page
+        image: html-server-image:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8081
