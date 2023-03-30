@@ -4,7 +4,7 @@ This project is done with the use of Kubernetes, Terraform, Ansible and AWS Clou
 ##### 1. Kubeadm Kubernetes Cluster:
 I deployed all the infrastures required to provision/setup Kubeadm Nodes using terraform and ansible. 
 
-The Secret files, terraform.tfvars, aws pem files are encrypted using ANSIBLE VAULT. To view, edit or decrypt the encrypted files, use "Faith2020@" p@ssword.
+The Secret files, terraform.tfvars, aws pem files are encrypted using ANSIBLE VAULT. To view, edit or decrypt the encrypted files, use "" p@ssword.
 
 The Master Node Controller Instance name on aws is KubeadmMasterNode
 with "3.85.147.34" with 3 Worker Nodes.
